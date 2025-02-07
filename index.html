@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebView Security Test Console</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .panel {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        pre {
+            background: #f5f5f5;
+            padding: 10px;
+            overflow-x: auto;
+        }
+        #qrcode {
+            margin: 20px 0;
+            text-align: center;
+        }
+        .url-display {
+            word-break: break-all;
+            background: #f5f5f5;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        #requestLog {
+            height: 400px;
+            overflow-y: auto;
+        }
+        .log-entry {
+            border-bottom: 1px solid #eee;
+            padding: 10px 0;
+        }
+        .btn {
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .btn:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>WebView Security Test Console</h1>
+    
+    <div class="panel">
+        <h2>Test URLs</h2>
+        <div class="url-display" id="testUrls"></div>
+        <div id="qrcode"></div>
+    </div>
+
+    <div class="panel">
+        <h2>Request Log</h2>
+        <button class="btn" onclick="clearLog()">Clear Log</button>
+        <div id="requestLog"></div>
+    </div>
+
+    <script>
+        // 替换成你的GitHub用户名
+        const baseUrl = 'https://你的用户名.github.io';
+        const testPath = '/test.html';
+        
+        // 生成测试URL和二维码
+        function generateTestUrls() {
+            const targetUrl = baseUrl + testPath;
+            const encodedUrl = encodeURIComponent(targetUrl);
+            const schemeUrl = `doubao://webview?url=${encodedUrl}`;
+            
+            document.getElementById('testUrls').innerHTML = `
+                <p><strong>Test Page:</strong><br>${targetUrl}</p>
+                <p><strong>Scheme URL:</strong><br>${schemeUrl}</p>
+            `;
+            
+            // 生成二维码
+            new QRCode(document.getElementById("qrcode"), {
+                text: schemeUrl,
+                width: 256,
+                height: 256
+            });
+        }
+
+        // 清除日志
+        function clearLog() {
+            localStorage.removeItem('requestLog');
+            updateLogDisplay();
+        }
+
+        // 更新日志显示
+        function updateLogDisplay() {
+            const logElement = document.getElementById('requestLog');
+            const logs = JSON.parse(localStorage.getItem('requestLog') || '[]');
+            
+            logElement.innerHTML = logs.map(log => `
+                <div class="log-entry">
+                    <pre>${JSON.stringify(log, null, 2)}</pre>
+                </div>
+            `).join('');
+        }
+
+        // 初始化
+        generateTestUrls();
+        updateLogDisplay();
+
+        // 定期检查日志更新
+        setInterval(updateLogDisplay, 1000);
+    </script>
+</body>
+</html>
